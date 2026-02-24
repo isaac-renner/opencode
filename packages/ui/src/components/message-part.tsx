@@ -29,8 +29,7 @@ import {
 } from "@opencode-ai/sdk/v2"
 import { createStore } from "solid-js/store"
 import { useData } from "../context"
-import { useDiffComponent } from "../context/diff"
-import { useCodeComponent } from "../context/code"
+import { useFileComponent } from "../context/file"
 import { useDialog } from "../context/dialog"
 import { useI18n } from "../context/i18n"
 import { BasicTool } from "./basic-tool"
@@ -1526,7 +1525,7 @@ ToolRegistry.register({
   name: "edit",
   render(props) {
     const i18n = useI18n()
-    const diffComponent = useDiffComponent()
+    const fileComponent = useFileComponent()
     const diagnostics = createMemo(() => getDiagnostics(props.metadata.diagnostics, props.input.filePath))
     const path = createMemo(() => props.metadata?.filediff?.file || props.input.filePath || "")
     const filename = () => getFilename(props.input.filePath ?? "")
@@ -1573,7 +1572,8 @@ ToolRegistry.register({
             >
               <div data-component="edit-content">
                 <Dynamic
-                  component={diffComponent}
+                  component={fileComponent}
+                  mode="diff"
                   before={{
                     name: props.metadata?.filediff?.file || props.input.filePath,
                     contents: props.metadata?.filediff?.before || props.input.oldString,
@@ -1597,7 +1597,7 @@ ToolRegistry.register({
   name: "write",
   render(props) {
     const i18n = useI18n()
-    const codeComponent = useCodeComponent()
+    const fileComponent = useFileComponent()
     const diagnostics = createMemo(() => getDiagnostics(props.metadata.diagnostics, props.input.filePath))
     const path = createMemo(() => props.input.filePath || "")
     const filename = () => getFilename(props.input.filePath ?? "")
@@ -1635,7 +1635,8 @@ ToolRegistry.register({
             <ToolFileAccordion path={path()}>
               <div data-component="write-content">
                 <Dynamic
-                  component={codeComponent}
+                  component={fileComponent}
+                  mode="text"
                   file={{
                     name: props.input.filePath,
                     contents: props.input.content,
@@ -1669,7 +1670,7 @@ ToolRegistry.register({
   name: "apply_patch",
   render(props) {
     const i18n = useI18n()
-    const diffComponent = useDiffComponent()
+    const fileComponent = useFileComponent()
     const files = createMemo(() => (props.metadata.files ?? []) as ApplyPatchFile[])
     const pending = createMemo(() => props.status === "pending" || props.status === "running")
     const single = createMemo(() => {
@@ -1777,7 +1778,8 @@ ToolRegistry.register({
                             <Show when={visible()}>
                               <div data-component="apply-patch-file-diff">
                                 <Dynamic
-                                  component={diffComponent}
+                                  component={fileComponent}
+                                  mode="diff"
                                   before={{ name: file.filePath, contents: file.before }}
                                   after={{ name: file.movePath ?? file.filePath, contents: file.after }}
                                 />
@@ -1854,7 +1856,8 @@ ToolRegistry.register({
               >
                 <div data-component="apply-patch-file-diff">
                   <Dynamic
-                    component={diffComponent}
+                    component={fileComponent}
+                    mode="diff"
                     before={{ name: file().filePath, contents: file().before }}
                     after={{ name: file().movePath ?? file().filePath, contents: file().after }}
                   />
